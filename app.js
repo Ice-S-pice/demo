@@ -1,21 +1,19 @@
 const dishes = [
   {
-    name: "Sunday dinner",
+    name: "T-bone steak",
     section: "Plats principaux",
-    file: "sunday-dinner.glb",
-    usdz: "sunday-dinner.usdz",
+    file: "tbonesteak.glb",
     has3d: true,
-    description: "Assiette genereuse, sauce chaude, legumes.",
-    price: "27"
+    description: "Jus corse, beurre noisette, herbes fraiches.",
+    price: "34"
   },
   {
-    name: "Poulet teriyaki",
-    section: "Plats principaux",
-    file: "teriyaki-chicken.glb",
-    usdz: "teriyaki-chicken.usdz",
+    name: "Caesar salad",
+    section: "Entrees",
+    file: "caesar-salad.glb",
     has3d: true,
-    description: "Poulet laque, sesame, garniture fraiche.",
-    price: "24"
+    description: "Laitue croquante, copeaux, croutons.",
+    price: "17"
   },
   {
     name: "Donut chocolat",
