@@ -6,14 +6,14 @@ La page affiche une vraie carte courte :
 
 - titre `Carte ete Brasserie Michot`
 - plats avec prix
-- 2 plats premium avec 3D/AR
+- 3 plats premium avec 3D/AR quand les formats sont disponibles
 - le reste de la carte en lignes classiques legeres
 - bouton `Voir mon plat`
 - bouton `Poser sur ma table` pour lancer l'AR
 
 ## Optimisations anti-bug
 
-- Seuls 2 plats chargent des fichiers 3D : Sunday dinner et Poulet teriyaki.
+- Seuls 3 plats chargent des fichiers 3D : Sunday dinner, Poulet teriyaki et Donut chocolat.
 - Les autres plats sont affiches comme les boissons, sans fichier 3D.
 - Aucun apercu 3D n'est charge dans la liste.
 - Le modele de la fenetre 3D est charge uniquement au clic sur `Voir mon plat`.
@@ -31,6 +31,7 @@ Pour une version commerciale, il faudra aussi compresser les `.glb`, car certain
 - `assets/models/sunday-dinner.usdz`
 - `assets/models/teriyaki-chicken.glb`
 - `assets/models/teriyaki-chicken.usdz`
+- `assets/models/chocolate-donut.glb`
 
 ## Lancer la demo
 

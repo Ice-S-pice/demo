@@ -3,6 +3,7 @@ const dishes = [
     name: "Sunday dinner",
     section: "Plats principaux",
     file: "sunday-dinner.glb",
+    usdz: "sunday-dinner.usdz",
     has3d: true,
     description: "Assiette genereuse, sauce chaude, legumes.",
     price: "27"
@@ -11,6 +12,7 @@ const dishes = [
     name: "Poulet teriyaki",
     section: "Plats principaux",
     file: "teriyaki-chicken.glb",
+    usdz: "teriyaki-chicken.usdz",
     has3d: true,
     description: "Poulet laque, sesame, garniture fraiche.",
     price: "24"
@@ -30,6 +32,8 @@ const dishes = [
   {
     name: "Donut chocolat",
     section: "Desserts",
+    file: "chocolate-donut.glb",
+    has3d: true,
     description: "Glacage chocolat, texture moelleuse.",
     price: "9"
   },
@@ -67,7 +71,7 @@ const drinks = [
 
 const sectionOrder = ["Entrees", "Plats principaux", "Boissons", "Desserts"];
 const modelPath = (file) => `assets/models/${encodeURIComponent(file)}`;
-const usdzPath = (file) => `assets/models/${encodeURIComponent(file.replace(/\.glb$/i, ".usdz"))}`;
+const usdzPath = (dish) => `assets/models/${encodeURIComponent(dish.usdz || dish.file.replace(/\.glb$/i, ".usdz"))}`;
 const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
 const dishGrid = document.querySelector("#dishGrid");
 const dialog = document.querySelector("#dishDialog");
@@ -111,7 +115,12 @@ function openIosQuickLook(dish) {
   const img = document.createElement("img");
 
   link.rel = "ar";
-  link.href = absoluteAssetUrl(usdzPath(dish.file));
+  if (!dish.usdz) {
+    showArFallback();
+    return;
+  }
+
+  link.href = absoluteAssetUrl(usdzPath(dish));
   link.style.display = "none";
   img.alt = "";
   link.append(img);
@@ -156,7 +165,9 @@ async function prepareViewer(dish) {
   const viewer = document.createElement("model-viewer");
   dialogTitle.textContent = dish.name;
   viewer.src = modelPath(dish.file);
-  viewer.setAttribute("ios-src", usdzPath(dish.file));
+  if (dish.usdz) {
+    viewer.setAttribute("ios-src", usdzPath(dish));
+  }
   viewer.alt = `${dish.name} en 3D`;
   viewer.setAttribute("camera-controls", "");
   viewer.setAttribute("touch-action", "pan-y");
