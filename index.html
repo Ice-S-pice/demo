@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Carte été | Brasserie Michot</title>
+    <meta
+      name="description"
+      content="Carte été Brasserie Michot avec aperçu 3D et réalité augmentée."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script
+      type="module"
+      src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js"
+    ></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="menu-page">
+      <header class="menu-header">
+        <div class="brand">
+          <span class="brand-mark">BM</span>
+          <div>
+            <p>Brasserie Michot</p>
+            <span>Vision Gourmand</span>
+          </div>
+        </div>
+        <a class="reserve-link" href="tel:+33000000000">Commander</a>
+      </header>
+
+      <section class="menu-title" aria-label="Carte été">
+        <p>Carte été</p>
+        <h1>Brasserie Michot</h1>
+      </section>
+
+      <section class="menu-list" id="dishGrid" aria-label="Plats de la carte"></section>
+
+      <footer class="menu-footer">
+        <p>Signature du Chef</p>
+        <span>Produits de saison, dressage en 3D et expérience AR à table.</span>
+      </footer>
+    </main>
+
+    <dialog class="dish-dialog" id="dishDialog" aria-label="Voir le plat en 3D">
+      <div class="dialog-head">
+        <strong id="dialogTitle"></strong>
+        <button class="icon-button" id="closeDialog" type="button" aria-label="Fermer">
+          ×
+        </button>
+      </div>
+      <model-viewer
+        id="dialogViewer"
+        camera-controls
+        touch-action="pan-y"
+        auto-rotate
+        rotation-per-second="16deg"
+        interaction-prompt="none"
+        shadow-intensity="0.7"
+        shadow-softness="0.85"
+        environment-image="neutral"
+        exposure="0.95"
+        ar
+        ar-modes="quick-look scene-viewer webxr"
+        ar-scale="fixed"
+      ></model-viewer>
+      <p class="dialog-note" id="dialogNote"></p>
+      <button class="button button-primary" id="dialogAr" type="button">
+        Poser sur ma table
+      </button>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
