@@ -10,6 +10,7 @@
   --soft: rgba(248, 241, 231, 0.48);
   --gold: #e0bd74;
   --green: #76c9bc;
+  --btn-text: #17120a;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -90,7 +91,7 @@ a {
   flex: 0 0 auto;
   border-radius: 999px;
   padding: 11px 16px;
-  color: #17120a;
+  color: var(--btn-text);
   background: var(--gold);
   font-size: 14px;
   font-weight: 800;
@@ -312,7 +313,7 @@ a {
 }
 
 .button-primary {
-  color: #17120a;
+  color: var(--btn-text);
   background: var(--gold);
 }
 
@@ -447,5 +448,69 @@ a {
   .dish-card,
   .button {
     transition: none;
+  }
+}
+
+@media print {
+  body {
+    background: white;
+    color: #111;
+  }
+
+  .menu-header {
+    background: white;
+    border-color: #ccc;
+  }
+
+  .brand-mark {
+    color: #333;
+    border-color: #999;
+  }
+
+  .reserve-link,
+  .dish-actions,
+  .dish-preview,
+  .dish-dialog {
+    display: none;
+  }
+
+  .dish-card {
+    grid-template-columns: 1fr;
+    background: white;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+
+  .classic-card {
+    background: white;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+
+  .menu-section-title {
+    color: #333;
+  }
+
+  .price {
+    color: #333;
+  }
+
+  .menu-title h1 {
+    color: #111;
+  }
+
+  .muted,
+  .soft,
+  .dialog-note {
+    color: #555;
+  }
+
+  .menu-footer {
+    background: white;
+    border-color: #ccc;
+  }
+
+  .menu-footer p {
+    color: #333;
   }
 }

@@ -2,7 +2,7 @@ const dishes = [
   {
     name: "T-bone steak medium",
     section: "Plats principaux",
-    file: "Miller and Carter T-bone steak medium.glb",
+    file: "tbonesteak.glb",
     has3d: true,
     description: "Jus corse, beurre noisette, herbes fraiches.",
     price: "34"
@@ -10,7 +10,7 @@ const dishes = [
   {
     name: "Poulet teriyaki",
     section: "Plats principaux",
-    file: "Teriyaki Chicken.glb",
+    file: "teriyaki-chicken.glb",
     has3d: true,
     description: "Poulet laque, sesame, garniture fraiche.",
     price: "24"
@@ -73,10 +73,7 @@ const drinks = [
 
 const sectionOrder = ["Entrees", "Plats principaux", "Boissons", "Desserts"];
 const modelPath = (file) => `assets/models/${encodeURIComponent(file)}`;
-const usdzPath = (file) => {
-  const usdzFile = `3dpea.com_${file.replace(/\.glb$/i, ".usdz")}`;
-  return `assets/models/${encodeURIComponent(usdzFile)}`;
-};
+const usdzPath = (file) => `assets/models/${encodeURIComponent(file.replace(/\.glb$/i, ".usdz"))}`;
 const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
 const dishGrid = document.querySelector("#dishGrid");
 const dialog = document.querySelector("#dishDialog");
@@ -90,21 +87,20 @@ let selectedDish = null;
 let modelViewerPromise = null;
 
 function isMobileArCandidate() {
-  const userAgent = navigator.userAgent || "";
-  return /Android|iPhone|iPad|iPod/i.test(userAgent);
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
 }
 
 function isIos() {
-  const userAgent = navigator.userAgent || "";
+  const ua = navigator.userAgent || "";
   const platform = navigator.platform || "";
-  return /iPhone|iPad|iPod/i.test(userAgent) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  return /iPhone|iPad|iPod/i.test(ua) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
 }
 
 function isAndroid() {
   return /Android/i.test(navigator.userAgent || "");
 }
 
-function showArFallback(dish) {
+function showArFallback() {
   dialogTitle.textContent = "AR disponible sur mobile compatible";
   dialogNote.textContent =
     "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore. Si le modele est trop lourd, l'ouverture peut prendre du temps.";
@@ -112,6 +108,7 @@ function showArFallback(dish) {
 
   if (!dialog.open) {
     dialog.showModal();
+    closeDialog.focus();
   }
 }
 
@@ -148,7 +145,11 @@ function ensureModelViewer() {
   }
 
   if (!modelViewerPromise) {
-    modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js");
+    modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js")
+      .catch((err) => {
+        modelViewerPromise = null;
+        throw new Error("Impossible de charger la bibliothèque 3D. Vérifiez votre connexion internet.");
+      });
   }
 
   return modelViewerPromise;
@@ -181,16 +182,17 @@ async function prepareViewer(dish) {
 async function openDish(dish) {
   selectedDish = dish;
   dialogTitle.textContent = dish.name;
-  dialogNote.textContent = "Chargement du plat en 3D...";
+  dialogNote.textContent = "Chargement du plat en 3D…";
   viewerSlot.innerHTML = "";
   dialog.showModal();
+  closeDialog.focus();
 
   try {
     await prepareViewer(dish);
     dialogNote.textContent = "";
   } catch (error) {
     console.warn("Impossible de charger la 3D:", error);
-    dialogNote.textContent = "La vue 3D n'a pas pu se charger sur cet appareil.";
+    dialogNote.textContent = error.message || "La vue 3D n'a pas pu se charger sur cet appareil.";
   }
 }
 
@@ -198,7 +200,7 @@ async function openAr(dish) {
   selectedDish = dish;
 
   if (!isMobileArCandidate()) {
-    showArFallback(dish);
+    showArFallback();
     return;
   }
 
@@ -212,7 +214,7 @@ async function openAr(dish) {
     return;
   }
 
-  showArFallback(dish);
+  showArFallback();
 }
 
 function createDishCard(dish) {
@@ -223,52 +225,86 @@ function createDishCard(dish) {
   const card = document.createElement("article");
   card.className = "dish-card";
 
-  card.innerHTML = `
-    <div class="dish-preview">
-      <div class="dish-placeholder" aria-hidden="true">
-        <span>3D</span>
-      </div>
-    </div>
-    <div class="dish-content">
-      <div class="dish-line">
-        <h2>${dish.name}</h2>
-        <span class="price">${dish.price}€</span>
-      </div>
-      <p>${dish.description}</p>
-      <div class="dish-actions">
-        <button class="button button-secondary" type="button">Voir mon plat</button>
-        <button class="button button-primary" type="button">Poser sur ma table</button>
-      </div>
-    </div>
-  `;
+  const preview = document.createElement("div");
+  preview.className = "dish-preview";
 
-  const [viewButton, arButton] = card.querySelectorAll("button");
+  const placeholder = document.createElement("div");
+  placeholder.className = "dish-placeholder";
+  placeholder.setAttribute("aria-hidden", "true");
 
+  const badge = document.createElement("span");
+  badge.textContent = "3D";
+  placeholder.append(badge);
+  preview.append(placeholder);
+
+  const content = document.createElement("div");
+  content.className = "dish-content";
+
+  const line = document.createElement("div");
+  line.className = "dish-line";
+
+  const title = document.createElement("h2");
+  title.textContent = dish.name;
+
+  const priceEl = document.createElement("span");
+  priceEl.className = "price";
+  priceEl.textContent = `${dish.price}€`;
+
+  line.append(title, priceEl);
+
+  const desc = document.createElement("p");
+  desc.textContent = dish.description;
+
+  const actions = document.createElement("div");
+  actions.className = "dish-actions";
+
+  const viewButton = document.createElement("button");
+  viewButton.className = "button button-secondary";
+  viewButton.type = "button";
+  viewButton.textContent = "Voir mon plat";
   viewButton.addEventListener("click", () => openDish(dish));
+
+  const arButton = document.createElement("button");
+  arButton.className = "button button-primary";
+  arButton.type = "button";
+  arButton.textContent = "Poser sur ma table";
   arButton.addEventListener("click", () => openAr(dish));
+
+  actions.append(viewButton, arButton);
+  content.append(line, desc, actions);
+  card.append(preview, content);
 
   return card;
 }
 
 function createSectionTitle(title) {
-  const sectionTitle = document.createElement("div");
-  sectionTitle.className = "menu-section-title";
-  sectionTitle.innerHTML = `<span>${title}</span>`;
-  return sectionTitle;
+  const div = document.createElement("div");
+  div.className = "menu-section-title";
+  const span = document.createElement("span");
+  span.textContent = title;
+  div.append(span);
+  return div;
 }
 
 function createClassicCard(item) {
   const card = document.createElement("article");
   card.className = "classic-card";
 
-  card.innerHTML = `
-    <div>
-      <h2>${item.name}</h2>
-      <p>${item.description}</p>
-    </div>
-    <span class="price">${item.price}€</span>
-  `;
+  const info = document.createElement("div");
 
+  const title = document.createElement("h2");
+  title.textContent = item.name;
+
+  const desc = document.createElement("p");
+  desc.textContent = item.description;
+
+  info.append(title, desc);
+
+  const priceEl = document.createElement("span");
+  priceEl.className = "price";
+  priceEl.textContent = `${item.price}€`;
+
+  card.append(info, priceEl);
   return card;
 }
 

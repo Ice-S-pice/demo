@@ -8,10 +8,14 @@
       name="description"
       content="Carte été Brasserie Michot avec aperçu 3D et réalité augmentée."
     />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' https://ajax.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; script-src 'self' https://ajax.googleapis.com blob: 'wasm-unsafe-eval'; style-src 'self' https://fonts.googleapis.com 'unsafe-inline'; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; worker-src blob:; connect-src 'self' https://ajax.googleapis.com; frame-src 'none'; object-src 'none';"
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Playfair+Display:wght@700&display=swap"
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
@@ -42,7 +46,7 @@
       </footer>
     </main>
 
-    <dialog class="dish-dialog" id="dishDialog" aria-label="Voir le plat en 3D">
+    <dialog class="dish-dialog" id="dishDialog" aria-labelledby="dialogTitle">
       <div class="dialog-head">
         <strong id="dialogTitle"></strong>
         <button class="icon-button" id="closeDialog" type="button" aria-label="Fermer">

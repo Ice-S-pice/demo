@@ -25,6 +25,13 @@ La page affiche une vraie carte courte :
 
 Pour une version commerciale, il faudra aussi compresser les `.glb`, car certains fichiers font plus de 30 Mo.
 
+## Modeles inclus
+
+- `assets/models/tbonesteak.glb`
+- `assets/models/tbonesteak.usdz`
+- `assets/models/teriyaki-chicken.glb`
+- `assets/models/teriyaki-chicken.usdz`
+
 ## Lancer la demo
 
 Depuis ce dossier :
