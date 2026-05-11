@@ -88,11 +88,8 @@ const dialogViewer = document.querySelector("#dialogViewer");
 const dialogNote = document.querySelector("#dialogNote");
 const closeDialog = document.querySelector("#closeDialog");
 const dialogAr = document.querySelector("#dialogAr");
-const previewQueue = [];
 
 let selectedDish = null;
-let selectedViewer = null;
-let isLoadingPreview = false;
 
 function isMobileArCandidate() {
   const userAgent = navigator.userAgent || "";
@@ -112,76 +109,23 @@ function showArFallback(dish) {
   }
 }
 
-function requestIdle(callback) {
-  if ("requestIdleCallback" in window) {
-    window.requestIdleCallback(callback, { timeout: 1200 });
-    return;
-  }
-
-  window.setTimeout(callback, 120);
-}
-
-function loadPreview(viewer) {
-  if (viewer.dataset.loaded === "true") {
-    return;
-  }
-
-  viewer.dataset.loaded = "true";
-  viewer.src = viewer.dataset.src;
-  viewer.setAttribute("ios-src", viewer.dataset.iosSrc);
-}
-
-function processPreviewQueue() {
-  if (isLoadingPreview || previewQueue.length === 0) {
-    return;
-  }
-
-  isLoadingPreview = true;
-  const viewer = previewQueue.shift();
-
-  requestIdle(() => {
-    loadPreview(viewer);
-    viewer.addEventListener(
-      "load",
-      () => {
-        isLoadingPreview = false;
-        processPreviewQueue();
-      },
-      { once: true }
-    );
-
-    window.setTimeout(() => {
-      isLoadingPreview = false;
-      processPreviewQueue();
-    }, 1800);
-  });
-}
-
-function queuePreview(viewer) {
-  if (viewer.dataset.queued === "true" || viewer.dataset.loaded === "true") {
-    return;
-  }
-
-  viewer.dataset.queued = "true";
-  previewQueue.push(viewer);
-  processPreviewQueue();
+function prepareViewer(dish) {
+  dialogTitle.textContent = dish.name;
+  dialogViewer.src = modelPath(dish.file);
+  dialogViewer.setAttribute("ios-src", usdzPath(dish.file));
+  dialogViewer.alt = `${dish.name} en 3D`;
 }
 
 function openDish(dish) {
   selectedDish = dish;
-  selectedViewer = null;
-  dialogTitle.textContent = dish.name;
   dialogNote.textContent = "";
-  dialogViewer.src = modelPath(dish.file);
-  dialogViewer.setAttribute("ios-src", usdzPath(dish.file));
-  dialogViewer.alt = `${dish.name} en 3D`;
+  prepareViewer(dish);
   dialog.showModal();
 }
 
-async function openAr(dish, viewer) {
+async function openAr(dish) {
   selectedDish = dish;
-  selectedViewer = viewer;
-  loadPreview(viewer);
+  prepareViewer(dish);
 
   if (!isMobileArCandidate()) {
     showArFallback(dish);
@@ -189,8 +133,8 @@ async function openAr(dish, viewer) {
   }
 
   try {
-    if (viewer.canActivateAR) {
-      await viewer.activateAR();
+    if (dialogViewer.activateAR) {
+      await dialogViewer.activateAR();
       return;
     }
   } catch (error) {
@@ -200,37 +144,15 @@ async function openAr(dish, viewer) {
   showArFallback(dish);
 }
 
-function setPreviewMotion(viewer, enabled) {
-  if (enabled) {
-    viewer.setAttribute("auto-rotate", "");
-    return;
-  }
-
-  viewer.removeAttribute("auto-rotate");
-}
-
 function createDishCard(dish) {
   const card = document.createElement("article");
   card.className = "dish-card";
 
   card.innerHTML = `
     <div class="dish-preview">
-      <model-viewer
-        data-src="${modelPath(dish.file)}"
-        data-ios-src="${usdzPath(dish.file)}"
-        alt="${dish.name} en 3D"
-        rotation-per-second="8deg"
-        interaction-prompt="none"
-        camera-orbit="25deg 70deg auto"
-        shadow-intensity="0.32"
-        environment-image="neutral"
-        exposure="0.88"
-        loading="lazy"
-        reveal="auto"
-        ar
-        ar-modes="quick-look scene-viewer webxr"
-        ar-scale="fixed">
-      </model-viewer>
+      <div class="dish-placeholder" aria-hidden="true">
+        <span>3D</span>
+      </div>
     </div>
     <div class="dish-content">
       <div class="dish-line">
@@ -245,15 +167,10 @@ function createDishCard(dish) {
     </div>
   `;
 
-  const viewer = card.querySelector("model-viewer");
   const [viewButton, arButton] = card.querySelectorAll("button");
 
-  card.addEventListener("pointerenter", () => setPreviewMotion(viewer, true));
-  card.addEventListener("pointerleave", () => setPreviewMotion(viewer, false));
-  card.addEventListener("touchstart", () => setPreviewMotion(viewer, true), { passive: true });
-
   viewButton.addEventListener("click", () => openDish(dish));
-  arButton.addEventListener("click", () => openAr(dish, viewer));
+  arButton.addEventListener("click", () => openAr(dish));
 
   return card;
 }
@@ -293,26 +210,11 @@ sectionOrder.forEach((section) => {
     .forEach((dish) => dishGrid.append(createDishCard(dish)));
 });
 
-const previewObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        queuePreview(entry.target);
-        previewObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { rootMargin: "260px 0px", threshold: 0.01 }
-);
-
-document.querySelectorAll(".dish-preview model-viewer").forEach((viewer) => {
-  previewObserver.observe(viewer);
-});
-
 closeDialog.addEventListener("click", () => dialog.close());
 
 dialog.addEventListener("close", () => {
   dialogViewer.removeAttribute("src");
+  dialogViewer.removeAttribute("ios-src");
 });
 
 dialog.addEventListener("click", (event) => {
@@ -322,11 +224,6 @@ dialog.addEventListener("click", (event) => {
 });
 
 dialogAr.addEventListener("click", async () => {
-  if (selectedDish && selectedViewer) {
-    await openAr(selectedDish, selectedViewer);
-    return;
-  }
-
   if (!selectedDish) {
     return;
   }
