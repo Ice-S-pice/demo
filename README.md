@@ -16,6 +16,9 @@ La page affiche une vraie carte courte :
 - Les modeles se chargent seulement quand la carte arrive pres de l'ecran.
 - Les apercus ne tournent que quand on survole ou touche une carte.
 - Le modele de la fenetre 3D est libere quand on ferme la fenetre.
+- Le bouton AR ne charge plus le viewer 3D avant d'ouvrir la camera.
+- iPhone ouvre directement le `.usdz` avec Quick Look.
+- Android ouvre directement Scene Viewer avec le `.glb` en HTTPS.
 
 Pour une version commerciale, il faudra aussi compresser les `.glb`, car certains fichiers font plus de 30 Mo.
 

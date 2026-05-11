@@ -81,6 +81,7 @@ const usdzPath = (file) => {
   const usdzFile = `3dpea.com_${file.replace(/\.glb$/i, ".usdz")}`;
   return `assets/models/${encodeURIComponent(usdzFile)}`;
 };
+const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
 const dishGrid = document.querySelector("#dishGrid");
 const dialog = document.querySelector("#dishDialog");
 const dialogTitle = document.querySelector("#dialogTitle");
@@ -96,10 +97,20 @@ function isMobileArCandidate() {
   return /Android|iPhone|iPad|iPod/i.test(userAgent);
 }
 
+function isIos() {
+  const userAgent = navigator.userAgent || "";
+  const platform = navigator.platform || "";
+  return /iPhone|iPad|iPod/i.test(userAgent) || (platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+function isAndroid() {
+  return /Android/i.test(navigator.userAgent || "");
+}
+
 function showArFallback(dish) {
   dialogTitle.textContent = "AR disponible sur mobile compatible";
   dialogNote.textContent =
-    "Ouvre cette page sur iPhone avec Safari ou sur Android compatible ARCore. Un hebergement HTTPS est recommande pour l'AR.";
+    "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore. Si le modele est trop lourd, l'ouverture peut prendre du temps.";
   dialogViewer.src = modelPath(dish.file);
   dialogViewer.setAttribute("ios-src", usdzPath(dish.file));
   dialogViewer.alt = `${dish.name} en 3D`;
@@ -107,6 +118,33 @@ function showArFallback(dish) {
   if (!dialog.open) {
     dialog.showModal();
   }
+}
+
+function openIosQuickLook(dish) {
+  const link = document.createElement("a");
+  const img = document.createElement("img");
+
+  link.rel = "ar";
+  link.href = absoluteAssetUrl(usdzPath(dish.file));
+  link.style.display = "none";
+  img.alt = "";
+  link.append(img);
+  document.body.append(link);
+  link.click();
+  link.remove();
+}
+
+function openAndroidSceneViewer(dish) {
+  const fileUrl = absoluteAssetUrl(modelPath(dish.file));
+  const fallbackUrl = encodeURIComponent(window.location.href);
+  const sceneViewerUrl =
+    `intent://arvr.google.com/scene-viewer/1.2?file=${encodeURIComponent(fileUrl)}` +
+    `&mode=ar_preferred&resizable=true#Intent;scheme=https;` +
+    `package=com.google.android.googlequicksearchbox;` +
+    `action=android.intent.action.VIEW;` +
+    `S.browser_fallback_url=${fallbackUrl};end;`;
+
+  window.location.href = sceneViewerUrl;
 }
 
 function prepareViewer(dish) {
@@ -125,20 +163,20 @@ function openDish(dish) {
 
 async function openAr(dish) {
   selectedDish = dish;
-  prepareViewer(dish);
 
   if (!isMobileArCandidate()) {
     showArFallback(dish);
     return;
   }
 
-  try {
-    if (dialogViewer.activateAR) {
-      await dialogViewer.activateAR();
-      return;
-    }
-  } catch (error) {
-    console.warn("Impossible de lancer l'AR:", error);
+  if (isIos()) {
+    openIosQuickLook(dish);
+    return;
+  }
+
+  if (isAndroid() && window.location.protocol === "https:") {
+    openAndroidSceneViewer(dish);
+    return;
   }
 
   showArFallback(dish);
@@ -228,19 +266,5 @@ dialogAr.addEventListener("click", async () => {
     return;
   }
 
-  if (!isMobileArCandidate()) {
-    showArFallback(selectedDish);
-    return;
-  }
-
-  try {
-    if (dialogViewer.canActivateAR) {
-      await dialogViewer.activateAR();
-      return;
-    }
-  } catch (error) {
-    console.warn("Impossible de lancer l'AR:", error);
-  }
-
-  showArFallback(selectedDish);
+  await openAr(selectedDish);
 });
