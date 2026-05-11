@@ -1,11 +1,11 @@
 const dishes = [
   {
-    name: "T-bone steak medium",
+    name: "Sunday dinner",
     section: "Plats principaux",
-    file: "tbonesteak.glb",
+    file: "sunday-dinner.glb",
     has3d: true,
-    description: "Jus corse, beurre noisette, herbes fraiches.",
-    price: "34"
+    description: "Assiette genereuse, sauce chaude, legumes.",
+    price: "27"
   },
   {
     name: "Poulet teriyaki",
@@ -20,12 +20,6 @@ const dishes = [
     section: "Desserts",
     description: "Fruits frais, dressage de saison.",
     price: "18"
-  },
-  {
-    name: "Sunday dinner",
-    section: "Plats principaux",
-    description: "Assiette genereuse, sauce chaude, legumes.",
-    price: "27"
   },
   {
     name: "Christmas steak",
