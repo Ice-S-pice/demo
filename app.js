@@ -18,6 +18,14 @@ const dishes = [
     price: "24"
   },
   {
+    name: "Donut chocolat",
+    section: "Plats principaux",
+    file: "chocolate-donut.glb",
+    has3d: true,
+    description: "Glacage chocolat, texture moelleuse.",
+    price: "9"
+  },
+  {
     name: "Plateau de fruits",
     section: "Desserts",
     description: "Fruits frais, dressage de saison.",
@@ -28,14 +36,6 @@ const dishes = [
     section: "Plats principaux",
     description: "Piece grillee, notes roties, sauce reduite.",
     price: "32"
-  },
-  {
-    name: "Donut chocolat",
-    section: "Desserts",
-    file: "chocolate-donut.glb",
-    has3d: true,
-    description: "Glacage chocolat, texture moelleuse.",
-    price: "9"
   },
   {
     name: "Breakfast Kabuki",
