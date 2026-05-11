@@ -8,6 +8,7 @@
       name="description"
       content="Carte été Brasserie Michot avec aperçu 3D et réalité augmentée."
     />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -48,6 +49,9 @@
         <button class="icon-button" id="closeDialog" type="button" aria-label="Fermer">
           ×
         </button>
+      </div>
+      <div class="load-bar" id="loadBar" hidden>
+        <div class="load-bar-fill" id="loadBarFill"></div>
       </div>
       <div class="viewer-slot" id="viewerSlot"></div>
       <p class="dialog-note" id="dialogNote"></p>

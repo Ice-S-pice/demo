@@ -19,7 +19,7 @@ const dishes = [
   },
   {
     name: "Donut chocolat",
-    section: "Plats principaux",
+    section: "Desserts",
     file: "chocolate-donut.glb",
     usdz: "chocolate-donut.usdz",
     has3d: true,
@@ -43,12 +43,6 @@ const dishes = [
     section: "Entrees",
     description: "Brunch frais, chaud et croustillant.",
     price: "21"
-  },
-  {
-    name: "Caesar salad",
-    section: "Entrees",
-    description: "Laitue croquante, copeaux, croutons.",
-    price: "17"
   }
 ];
 
@@ -79,6 +73,8 @@ const dialog = document.querySelector("#dishDialog");
 const dialogTitle = document.querySelector("#dialogTitle");
 const viewerSlot = document.querySelector("#viewerSlot");
 const dialogNote = document.querySelector("#dialogNote");
+const loadBar = document.querySelector("#loadBar");
+const loadBarFill = document.querySelector("#loadBarFill");
 const closeDialog = document.querySelector("#closeDialog");
 const dialogAr = document.querySelector("#dialogAr");
 
@@ -102,7 +98,7 @@ function isAndroid() {
 function showArFallback() {
   dialogTitle.textContent = "AR disponible sur mobile compatible";
   dialogNote.textContent =
-    "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore. Si le modele est trop lourd, l'ouverture peut prendre du temps.";
+    "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore.";
   viewerSlot.innerHTML = "";
 
   if (!dialog.open) {
@@ -112,15 +108,15 @@ function showArFallback() {
 }
 
 function openIosQuickLook(dish) {
-  const link = document.createElement("a");
-  const img = document.createElement("img");
-
-  link.rel = "ar";
   if (!dish.usdz) {
     showArFallback();
     return;
   }
 
+  const link = document.createElement("a");
+  const img = document.createElement("img");
+
+  link.rel = "ar";
   link.href = absoluteAssetUrl(usdzPath(dish));
   link.style.display = "none";
   img.alt = "";
@@ -130,19 +126,6 @@ function openIosQuickLook(dish) {
   link.remove();
 }
 
-function openAndroidSceneViewer(dish) {
-  const fileUrl = absoluteAssetUrl(modelPath(dish.file));
-  const fallbackUrl = encodeURIComponent(window.location.href);
-  const sceneViewerUrl =
-    `intent://arvr.google.com/scene-viewer/1.2?file=${encodeURIComponent(fileUrl)}` +
-    `&mode=ar_preferred&resizable=true#Intent;scheme=https;` +
-    `package=com.google.android.googlequicksearchbox;` +
-    `action=android.intent.action.VIEW;` +
-    `S.browser_fallback_url=${fallbackUrl};end;`;
-
-  window.location.href = sceneViewerUrl;
-}
-
 function ensureModelViewer() {
   if (customElements.get("model-viewer")) {
     return Promise.resolve();
@@ -150,9 +133,9 @@ function ensureModelViewer() {
 
   if (!modelViewerPromise) {
     modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js")
-      .catch((err) => {
+      .catch(() => {
         modelViewerPromise = null;
-        throw new Error("Impossible de charger la bibliothèque 3D. Vérifiez votre connexion internet.");
+        throw new Error("Impossible de charger la bibliotheque 3D. Verifiez votre connexion internet.");
       });
   }
 
@@ -169,7 +152,7 @@ async function prepareViewer(dish) {
   if (dish.usdz) {
     viewer.setAttribute("ios-src", usdzPath(dish));
   }
-  viewer.alt = `${dish.name} en 3D`;
+  viewer.alt = dish.name;
   viewer.setAttribute("camera-controls", "");
   viewer.setAttribute("touch-action", "pan-y");
   viewer.setAttribute("auto-rotate", "");
@@ -180,9 +163,26 @@ async function prepareViewer(dish) {
   viewer.setAttribute("environment-image", "neutral");
   viewer.setAttribute("exposure", "0.95");
   viewer.setAttribute("ar", "");
-  viewer.setAttribute("ar-modes", "quick-look scene-viewer webxr");
+  viewer.setAttribute("ar-modes", "webxr scene-viewer quick-look");
   viewer.setAttribute("ar-scale", "fixed");
+
+  loadBarFill.style.width = "0%";
+  loadBar.hidden = false;
+
+  viewer.addEventListener("progress", (e) => {
+    loadBarFill.style.width = `${e.detail.totalProgress * 100}%`;
+  });
+
+  viewer.addEventListener("load", () => {
+    loadBar.hidden = true;
+  }, { once: true });
+
+  viewer.addEventListener("error", () => {
+    loadBar.hidden = true;
+  }, { once: true });
+
   viewerSlot.append(viewer);
+  return viewer;
 }
 
 async function openDish(dish) {
@@ -194,10 +194,12 @@ async function openDish(dish) {
   closeDialog.focus();
 
   try {
-    await prepareViewer(dish);
-    dialogNote.textContent = "";
+    const viewer = await prepareViewer(dish);
+    viewer.addEventListener("load", () => {
+      dialogNote.textContent = "";
+    }, { once: true });
   } catch (error) {
-    console.warn("Impossible de charger la 3D:", error);
+    loadBar.hidden = true;
     dialogNote.textContent = error.message || "La vue 3D n'a pas pu se charger sur cet appareil.";
   }
 }
@@ -215,8 +217,21 @@ async function openAr(dish) {
     return;
   }
 
-  if (isAndroid() && window.location.protocol === "https:") {
-    openAndroidSceneViewer(dish);
+  if (isAndroid()) {
+    dialogTitle.textContent = dish.name;
+    dialogNote.textContent = "Preparation de la realite augmentee…";
+    viewerSlot.innerHTML = "";
+    dialog.showModal();
+    closeDialog.focus();
+
+    try {
+      const viewer = await prepareViewer(dish);
+      dialogNote.textContent = "";
+      viewer.activateAR();
+    } catch (error) {
+      loadBar.hidden = true;
+      dialogNote.textContent = error.message || "Impossible de lancer la realite augmentee.";
+    }
     return;
   }
 
@@ -314,15 +329,11 @@ function createClassicCard(item) {
   return card;
 }
 
-function createDrinkCard(drink) {
-  return createClassicCard(drink);
-}
-
 sectionOrder.forEach((section) => {
   dishGrid.append(createSectionTitle(section));
 
   if (section === "Boissons") {
-    drinks.forEach((drink) => dishGrid.append(createDrinkCard(drink)));
+    drinks.forEach((drink) => dishGrid.append(createClassicCard(drink)));
     return;
   }
 
@@ -335,6 +346,7 @@ closeDialog.addEventListener("click", () => dialog.close());
 
 dialog.addEventListener("close", () => {
   viewerSlot.innerHTML = "";
+  loadBar.hidden = true;
 });
 
 dialog.addEventListener("click", (event) => {
@@ -344,9 +356,6 @@ dialog.addEventListener("click", (event) => {
 });
 
 dialogAr.addEventListener("click", async () => {
-  if (!selectedDish) {
-    return;
-  }
-
+  if (!selectedDish) return;
   await openAr(selectedDish);
 });

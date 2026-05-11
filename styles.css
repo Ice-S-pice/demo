@@ -377,6 +377,22 @@ a {
   line-height: 1;
 }
 
+.load-bar {
+  height: 2px;
+  margin: 10px 0 0;
+  background: var(--line);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.load-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  border-radius: 1px;
+  transition: width 150ms ease;
+}
+
 .viewer-slot {
   width: 100%;
   height: min(58vh, 420px);
