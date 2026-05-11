@@ -85,12 +85,13 @@ const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
 const dishGrid = document.querySelector("#dishGrid");
 const dialog = document.querySelector("#dishDialog");
 const dialogTitle = document.querySelector("#dialogTitle");
-const dialogViewer = document.querySelector("#dialogViewer");
+const viewerSlot = document.querySelector("#viewerSlot");
 const dialogNote = document.querySelector("#dialogNote");
 const closeDialog = document.querySelector("#closeDialog");
 const dialogAr = document.querySelector("#dialogAr");
 
 let selectedDish = null;
+let modelViewerPromise = null;
 
 function isMobileArCandidate() {
   const userAgent = navigator.userAgent || "";
@@ -111,9 +112,7 @@ function showArFallback(dish) {
   dialogTitle.textContent = "AR disponible sur mobile compatible";
   dialogNote.textContent =
     "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore. Si le modele est trop lourd, l'ouverture peut prendre du temps.";
-  dialogViewer.src = modelPath(dish.file);
-  dialogViewer.setAttribute("ios-src", usdzPath(dish.file));
-  dialogViewer.alt = `${dish.name} en 3D`;
+  viewerSlot.innerHTML = "";
 
   if (!dialog.open) {
     dialog.showModal();
@@ -147,18 +146,56 @@ function openAndroidSceneViewer(dish) {
   window.location.href = sceneViewerUrl;
 }
 
-function prepareViewer(dish) {
-  dialogTitle.textContent = dish.name;
-  dialogViewer.src = modelPath(dish.file);
-  dialogViewer.setAttribute("ios-src", usdzPath(dish.file));
-  dialogViewer.alt = `${dish.name} en 3D`;
+function ensureModelViewer() {
+  if (customElements.get("model-viewer")) {
+    return Promise.resolve();
+  }
+
+  if (!modelViewerPromise) {
+    modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js");
+  }
+
+  return modelViewerPromise;
 }
 
-function openDish(dish) {
+async function prepareViewer(dish) {
+  await ensureModelViewer();
+  viewerSlot.innerHTML = "";
+
+  const viewer = document.createElement("model-viewer");
+  dialogTitle.textContent = dish.name;
+  viewer.src = modelPath(dish.file);
+  viewer.setAttribute("ios-src", usdzPath(dish.file));
+  viewer.alt = `${dish.name} en 3D`;
+  viewer.setAttribute("camera-controls", "");
+  viewer.setAttribute("touch-action", "pan-y");
+  viewer.setAttribute("auto-rotate", "");
+  viewer.setAttribute("rotation-per-second", "16deg");
+  viewer.setAttribute("interaction-prompt", "none");
+  viewer.setAttribute("shadow-intensity", "0.7");
+  viewer.setAttribute("shadow-softness", "0.85");
+  viewer.setAttribute("environment-image", "neutral");
+  viewer.setAttribute("exposure", "0.95");
+  viewer.setAttribute("ar", "");
+  viewer.setAttribute("ar-modes", "quick-look scene-viewer webxr");
+  viewer.setAttribute("ar-scale", "fixed");
+  viewerSlot.append(viewer);
+}
+
+async function openDish(dish) {
   selectedDish = dish;
-  dialogNote.textContent = "";
-  prepareViewer(dish);
+  dialogTitle.textContent = dish.name;
+  dialogNote.textContent = "Chargement du plat en 3D...";
+  viewerSlot.innerHTML = "";
   dialog.showModal();
+
+  try {
+    await prepareViewer(dish);
+    dialogNote.textContent = "";
+  } catch (error) {
+    console.warn("Impossible de charger la 3D:", error);
+    dialogNote.textContent = "La vue 3D n'a pas pu se charger sur cet appareil.";
+  }
 }
 
 async function openAr(dish) {
@@ -251,8 +288,7 @@ sectionOrder.forEach((section) => {
 closeDialog.addEventListener("click", () => dialog.close());
 
 dialog.addEventListener("close", () => {
-  dialogViewer.removeAttribute("src");
-  dialogViewer.removeAttribute("ios-src");
+  viewerSlot.innerHTML = "";
 });
 
 dialog.addEventListener("click", (event) => {

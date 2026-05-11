@@ -19,6 +19,7 @@ La page affiche une vraie carte courte :
 - Le bouton AR ne charge plus le viewer 3D avant d'ouvrir la camera.
 - iPhone ouvre directement le `.usdz` avec Quick Look.
 - Android ouvre directement Scene Viewer avec le `.glb` en HTTPS.
+- La librairie `model-viewer` n'est plus chargee au demarrage, seulement au clic sur `Voir mon plat`.
 
 Pour une version commerciale, il faudra aussi compresser les `.glb`, car certains fichiers font plus de 30 Mo.
 
