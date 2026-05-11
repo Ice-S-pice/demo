@@ -3,6 +3,7 @@ const dishes = [
     name: "T-bone steak",
     section: "Plats principaux",
     file: "tbonesteak.glb",
+    usdz: "tbonesteak.usdz",
     has3d: true,
     description: "Jus corse, beurre noisette, herbes fraiches.",
     price: "34"
@@ -11,6 +12,7 @@ const dishes = [
     name: "Caesar salad",
     section: "Entrees",
     file: "caesar-salad.glb",
+    usdz: "caesar-salad.usdz",
     has3d: true,
     description: "Laitue croquante, copeaux, croutons.",
     price: "17"
@@ -19,6 +21,7 @@ const dishes = [
     name: "Donut chocolat",
     section: "Plats principaux",
     file: "chocolate-donut.glb",
+    usdz: "chocolate-donut.usdz",
     has3d: true,
     description: "Glacage chocolat, texture moelleuse.",
     price: "9"
