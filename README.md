@@ -6,15 +6,17 @@ La page affiche une vraie carte courte :
 
 - titre `Carte ete Brasserie Michot`
 - plats avec prix
-- apercu 3D discret
+- 2 plats premium avec 3D/AR
+- le reste de la carte en lignes classiques legeres
 - bouton `Voir mon plat`
 - bouton `Poser sur ma table` pour lancer l'AR
 
 ## Optimisations anti-bug
 
-- Les apercus 3D ne chargent plus tous en meme temps.
-- Les modeles se chargent seulement quand la carte arrive pres de l'ecran.
-- Les apercus ne tournent que quand on survole ou touche une carte.
+- Seuls 2 plats chargent des fichiers 3D : T-bone steak medium et Poulet teriyaki.
+- Les autres plats sont affiches comme les boissons, sans fichier 3D.
+- Aucun apercu 3D n'est charge dans la liste.
+- Le modele de la fenetre 3D est charge uniquement au clic sur `Voir mon plat`.
 - Le modele de la fenetre 3D est libere quand on ferme la fenetre.
 - Le bouton AR ne charge plus le viewer 3D avant d'ouvrir la camera.
 - iPhone ouvre directement le `.usdz` avec Quick Look.

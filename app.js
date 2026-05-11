@@ -3,6 +3,7 @@ const dishes = [
     name: "T-bone steak medium",
     section: "Plats principaux",
     file: "Miller and Carter T-bone steak medium.glb",
+    has3d: true,
     description: "Jus corse, beurre noisette, herbes fraiches.",
     price: "34"
   },
@@ -10,48 +11,43 @@ const dishes = [
     name: "Poulet teriyaki",
     section: "Plats principaux",
     file: "Teriyaki Chicken.glb",
+    has3d: true,
     description: "Poulet laque, sesame, garniture fraiche.",
     price: "24"
   },
   {
     name: "Plateau de fruits",
     section: "Desserts",
-    file: "Halloween Fruit platter.glb",
     description: "Fruits frais, dressage de saison.",
     price: "18"
   },
   {
     name: "Sunday dinner",
     section: "Plats principaux",
-    file: "DexH - Sunday dinner - bbq beef chicken salad lasagna lunch the kitchen fairy.glb",
     description: "Assiette genereuse, sauce chaude, legumes.",
     price: "27"
   },
   {
     name: "Christmas steak",
     section: "Plats principaux",
-    file: "Christmas steak.glb",
     description: "Piece grillee, notes roties, sauce reduite.",
     price: "32"
   },
   {
     name: "Donut chocolat",
     section: "Desserts",
-    file: "Chocolate Donut.glb",
     description: "Glacage chocolat, texture moelleuse.",
     price: "9"
   },
   {
     name: "Breakfast Kabuki",
     section: "Entrees",
-    file: "Breakfast Kabuki @ San Francisco.glb",
     description: "Brunch frais, chaud et croustillant.",
     price: "21"
   },
   {
     name: "Caesar salad",
     section: "Entrees",
-    file: "3-D Caesar salad Seattle.glb",
     description: "Laitue croquante, copeaux, croutons.",
     price: "17"
   }
@@ -220,6 +216,10 @@ async function openAr(dish) {
 }
 
 function createDishCard(dish) {
+  if (!dish.has3d) {
+    return createClassicCard(dish);
+  }
+
   const card = document.createElement("article");
   card.className = "dish-card";
 
@@ -257,19 +257,23 @@ function createSectionTitle(title) {
   return sectionTitle;
 }
 
-function createDrinkCard(drink) {
+function createClassicCard(item) {
   const card = document.createElement("article");
-  card.className = "drink-card";
+  card.className = "classic-card";
 
   card.innerHTML = `
     <div>
-      <h2>${drink.name}</h2>
-      <p>${drink.description}</p>
+      <h2>${item.name}</h2>
+      <p>${item.description}</p>
     </div>
-    <span class="price">${drink.price}€</span>
+    <span class="price">${item.price}€</span>
   `;
 
   return card;
+}
+
+function createDrinkCard(drink) {
+  return createClassicCard(drink);
 }
 
 sectionOrder.forEach((section) => {

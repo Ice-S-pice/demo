@@ -168,7 +168,7 @@ a {
   background: rgba(29, 30, 32, 0.94);
 }
 
-.drink-card {
+.classic-card {
   display: flex;
   min-height: 116px;
   align-items: center;
@@ -184,19 +184,19 @@ a {
     background 180ms ease;
 }
 
-.drink-card:hover {
+.classic-card:hover {
   transform: translateY(-3px);
   border-color: var(--line-gold);
   background: rgba(29, 30, 32, 0.9);
 }
 
-.drink-card h2 {
+.classic-card h2 {
   margin: 0;
   font-size: clamp(18px, 2vw, 24px);
   line-height: 1.14;
 }
 
-.drink-card p {
+.classic-card p {
   margin: 9px 0 0;
   color: var(--muted);
   line-height: 1.45;
