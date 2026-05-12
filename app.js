@@ -88,6 +88,7 @@ const dialogShare = document.querySelector("#dialogShare");
 const arLoading = document.querySelector("#arLoading");
 
 let selectedDish = null;
+let currentViewer = null;
 let modelViewerPromise = null;
 
 // --- Helpers ---
@@ -103,6 +104,27 @@ function dishSlug(dish) {
 
 function dishUrl(dish) {
   return new URL(`#plat=${dishSlug(dish)}`, window.location.href).href;
+}
+
+function iosQuickLookUrl(dish) {
+  const params = new URLSearchParams({
+    callToAction: "Commander ce plat",
+    checkoutTitle: dish.name,
+    checkoutSubtitle: dish.description,
+    price: formatPrice(dish.price)
+  });
+
+  return `${absoluteAssetUrl(usdzPath(dish))}#${params}`;
+}
+
+function androidSceneViewerUrl(dish) {
+  const modelUrl = absoluteAssetUrl(modelPath(dish.file));
+
+  return (
+    `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(modelUrl)}&mode=ar_only&title=${encodeURIComponent(dish.name)}` +
+    `#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;` +
+    `S.browser_fallback_url=${encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.ar.core")};end;`
+  );
 }
 
 function isMobileArCandidate() {
@@ -183,20 +205,14 @@ function openIosQuickLook(dish) {
     return;
   }
 
-  const params = new URLSearchParams({
-    callToAction: "Commander ce plat",
-    checkoutTitle: dish.name,
-    checkoutSubtitle: dish.description,
-    price: formatPrice(dish.price)
-  });
-
   const link = document.createElement("a");
   const img = document.createElement("img");
 
   link.rel = "ar";
-  link.href = `${absoluteAssetUrl(usdzPath(dish))}#${params}`;
-  link.style.display = "none";
+  link.href = iosQuickLookUrl(dish);
+  link.className = "ar-direct-link";
   img.alt = "";
+  img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
   link.append(img);
   document.body.append(link);
   link.click();
@@ -227,6 +243,7 @@ async function prepareViewer(dish) {
   viewerSlot.classList.remove("viewer-slot--qr");
 
   const viewer = document.createElement("model-viewer");
+  currentViewer = viewer;
   dialogTitle.textContent = dish.name;
   viewer.src = modelPath(dish.file);
   if (dish.usdz) viewer.setAttribute("ios-src", usdzPath(dish));
@@ -315,12 +332,7 @@ async function openAndroidWebXrAr(dish) {
 }
 
 function openAndroidSceneViewer(dish) {
-  const modelUrl = absoluteAssetUrl(modelPath(dish.file));
-  const intentUrl =
-    `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(modelUrl)}&mode=ar_only&title=${encodeURIComponent(dish.name)}` +
-    `#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;` +
-    `S.browser_fallback_url=${encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.ar.core")};end;`;
-  window.location.href = intentUrl;
+  window.location.href = androidSceneViewerUrl(dish);
 }
 
 async function openAr(dish) {
@@ -347,6 +359,45 @@ async function openAr(dish) {
   }
 
   showArFallback(dish);
+}
+
+function createArButton(dish) {
+  if (isIos() && dish.usdz) {
+    const link = document.createElement("a");
+    const img = document.createElement("img");
+    const label = document.createElement("span");
+
+    link.className = "button button-primary";
+    link.href = iosQuickLookUrl(dish);
+    link.rel = "ar";
+    img.className = "ar-link-image";
+    img.alt = "";
+    img.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+    label.textContent = "Poser sur ma table";
+    link.append(img, label);
+    link.addEventListener("click", () => {
+      selectedDish = dish;
+    });
+    return link;
+  }
+
+  if (isAndroid()) {
+    const link = document.createElement("a");
+    link.className = "button button-primary";
+    link.href = androidSceneViewerUrl(dish);
+    link.textContent = "Poser sur ma table";
+    link.addEventListener("click", () => {
+      selectedDish = dish;
+    });
+    return link;
+  }
+
+  const button = document.createElement("button");
+  button.className = "button button-primary";
+  button.type = "button";
+  button.textContent = "Poser sur ma table";
+  button.addEventListener("click", () => openAr(dish));
+  return button;
 }
 
 // --- Partage ---
@@ -418,11 +469,7 @@ function createDishCard(dish) {
   viewButton.textContent = "Voir mon plat";
   viewButton.addEventListener("click", () => openDish(dish));
 
-  const arButton = document.createElement("button");
-  arButton.className = "button button-primary";
-  arButton.type = "button";
-  arButton.textContent = "Poser sur ma table";
-  arButton.addEventListener("click", () => openAr(dish));
+  const arButton = createArButton(dish);
 
   const shareBtn = document.createElement("button");
   shareBtn.className = "button button-icon";
@@ -491,6 +538,7 @@ closeDialog.addEventListener("click", () => dialog.close());
 dialog.addEventListener("close", () => {
   history.replaceState(null, "", location.pathname);
   viewerSlot.innerHTML = "";
+  currentViewer = null;
   viewerSlot.classList.remove("viewer-slot--qr");
   loadBar.hidden = true;
 });
@@ -500,6 +548,11 @@ dialog.addEventListener("click", (e) => {
 });
 
 dialogAr.addEventListener("click", async () => {
+  if (currentViewer && typeof currentViewer.activateAR === "function") {
+    currentViewer.activateAR();
+    return;
+  }
+
   if (selectedDish) await openAr(selectedDish);
 });
 
