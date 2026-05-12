@@ -68,6 +68,13 @@ const sectionOrder = ["Entrees", "Plats principaux", "Boissons", "Desserts"];
 const modelPath = (file) => `assets/models/${encodeURIComponent(file)}`;
 const usdzPath = (dish) => `assets/models/${encodeURIComponent(dish.usdz || dish.file.replace(/\.glb$/i, ".usdz"))}`;
 const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
+const formatPrice = (price) =>
+  new Intl.NumberFormat("fr-CH", {
+    style: "currency",
+    currency: "CHF",
+    maximumFractionDigits: 0
+  }).format(Number(price));
+
 const dishGrid = document.querySelector("#dishGrid");
 const dialog = document.querySelector("#dishDialog");
 const dialogTitle = document.querySelector("#dialogTitle");
@@ -77,9 +84,26 @@ const loadBar = document.querySelector("#loadBar");
 const loadBarFill = document.querySelector("#loadBarFill");
 const closeDialog = document.querySelector("#closeDialog");
 const dialogAr = document.querySelector("#dialogAr");
+const dialogShare = document.querySelector("#dialogShare");
+const arLoading = document.querySelector("#arLoading");
 
 let selectedDish = null;
 let modelViewerPromise = null;
+
+// --- Helpers ---
+
+function dishSlug(dish) {
+  return dish.name
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9-]/g, "");
+}
+
+function dishUrl(dish) {
+  return new URL(`#plat=${dishSlug(dish)}`, window.location.href).href;
+}
 
 function isMobileArCandidate() {
   return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || "");
@@ -95,11 +119,55 @@ function isAndroid() {
   return /Android/i.test(navigator.userAgent || "");
 }
 
-function showArFallback() {
-  dialogTitle.textContent = "AR disponible sur mobile compatible";
-  dialogNote.textContent =
-    "Ouvre cette page en HTTPS sur iPhone avec Safari ou sur Android compatible ARCore.";
+// --- Toast ---
+
+function showToast(msg) {
+  const existing = document.querySelector(".toast");
+  if (existing) existing.remove();
+
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  toast.textContent = msg;
+  document.body.append(toast);
+
+  requestAnimationFrame(() => {
+    toast.classList.add("toast--visible");
+    setTimeout(() => {
+      toast.classList.remove("toast--visible");
+      toast.addEventListener("transitionend", () => toast.remove(), { once: true });
+    }, 2200);
+  });
+}
+
+// --- AR loading overlay ---
+
+function showArLoading() {
+  arLoading.hidden = false;
+}
+
+function hideArLoading() {
+  arLoading.hidden = true;
+}
+
+// --- Desktop fallback: QR code ---
+
+function showArFallback(dish) {
+  const url = dish ? dishUrl(dish) : window.location.href;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}&bgcolor=111214&color=f8f1e7&margin=1`;
+
+  dialogTitle.textContent = dish ? dish.name : "Réalité augmentée";
+  dialogNote.textContent = "Scannez depuis un iPhone (Safari) ou Android compatible ARCore.";
+
   viewerSlot.innerHTML = "";
+  viewerSlot.classList.add("viewer-slot--qr");
+
+  const img = document.createElement("img");
+  img.src = qrSrc;
+  img.className = "qr-code";
+  img.alt = "QR code AR";
+  img.width = 180;
+  img.height = 180;
+  viewerSlot.append(img);
 
   if (!dialog.open) {
     dialog.showModal();
@@ -107,17 +175,26 @@ function showArFallback() {
   }
 }
 
+// --- iOS Quick Look avec call-to-action ---
+
 function openIosQuickLook(dish) {
   if (!dish.usdz) {
-    showArFallback();
+    showArFallback(dish);
     return;
   }
+
+  const params = new URLSearchParams({
+    callToAction: "Commander ce plat",
+    checkoutTitle: dish.name,
+    checkoutSubtitle: dish.description,
+    price: formatPrice(dish.price)
+  });
 
   const link = document.createElement("a");
   const img = document.createElement("img");
 
   link.rel = "ar";
-  link.href = absoluteAssetUrl(usdzPath(dish));
+  link.href = `${absoluteAssetUrl(usdzPath(dish))}#${params}`;
   link.style.display = "none";
   img.alt = "";
   link.append(img);
@@ -126,10 +203,10 @@ function openIosQuickLook(dish) {
   link.remove();
 }
 
+// --- model-viewer chargement lazy ---
+
 function ensureModelViewer() {
-  if (customElements.get("model-viewer")) {
-    return Promise.resolve();
-  }
+  if (customElements.get("model-viewer")) return Promise.resolve();
 
   if (!modelViewerPromise) {
     modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js")
@@ -142,16 +219,17 @@ function ensureModelViewer() {
   return modelViewerPromise;
 }
 
+// --- Visionneuse 3D dans le dialog ---
+
 async function prepareViewer(dish) {
   await ensureModelViewer();
   viewerSlot.innerHTML = "";
+  viewerSlot.classList.remove("viewer-slot--qr");
 
   const viewer = document.createElement("model-viewer");
   dialogTitle.textContent = dish.name;
   viewer.src = modelPath(dish.file);
-  if (dish.usdz) {
-    viewer.setAttribute("ios-src", usdzPath(dish));
-  }
+  if (dish.usdz) viewer.setAttribute("ios-src", usdzPath(dish));
   viewer.alt = dish.name;
   viewer.setAttribute("camera-controls", "");
   viewer.setAttribute("touch-action", "pan-y");
@@ -172,14 +250,8 @@ async function prepareViewer(dish) {
   viewer.addEventListener("progress", (e) => {
     loadBarFill.style.width = `${e.detail.totalProgress * 100}%`;
   });
-
-  viewer.addEventListener("load", () => {
-    loadBar.hidden = true;
-  }, { once: true });
-
-  viewer.addEventListener("error", () => {
-    loadBar.hidden = true;
-  }, { once: true });
+  viewer.addEventListener("load", () => { loadBar.hidden = true; }, { once: true });
+  viewer.addEventListener("error", () => { loadBar.hidden = true; }, { once: true });
 
   viewerSlot.append(viewer);
   return viewer;
@@ -187,28 +259,75 @@ async function prepareViewer(dish) {
 
 async function openDish(dish) {
   selectedDish = dish;
+  history.replaceState(null, "", `#plat=${dishSlug(dish)}`);
   dialogTitle.textContent = dish.name;
   dialogNote.textContent = "Chargement du plat en 3D…";
   viewerSlot.innerHTML = "";
+  viewerSlot.classList.remove("viewer-slot--qr");
   dialog.showModal();
   closeDialog.focus();
 
   try {
     const viewer = await prepareViewer(dish);
-    viewer.addEventListener("load", () => {
-      dialogNote.textContent = "";
-    }, { once: true });
+    viewer.addEventListener("load", () => { dialogNote.textContent = ""; }, { once: true });
   } catch (error) {
     loadBar.hidden = true;
     dialogNote.textContent = error.message || "La vue 3D n'a pas pu se charger sur cet appareil.";
   }
 }
 
+// --- Android AR : WebXR → Scene Viewer en fallback ---
+
+async function checkWebXrAr() {
+  if (!navigator.xr) return false;
+  return navigator.xr.isSessionSupported("immersive-ar").catch(() => false);
+}
+
+async function openAndroidWebXrAr(dish) {
+  showArLoading();
+
+  try {
+    await ensureModelViewer();
+
+    const viewer = document.createElement("model-viewer");
+    viewer.src = modelPath(dish.file);
+    viewer.setAttribute("ar", "");
+    viewer.setAttribute("ar-modes", "webxr");
+    viewer.setAttribute("ar-scale", "fixed");
+    viewer.style.cssText = "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px";
+    document.body.append(viewer);
+
+    await new Promise((resolve, reject) => {
+      viewer.addEventListener("load", resolve, { once: true });
+      viewer.addEventListener("error", () => reject(new Error("load failed")), { once: true });
+    });
+
+    hideArLoading();
+    viewer.activateAR();
+
+    viewer.addEventListener("ar-status", (e) => {
+      if (e.detail.status === "not-presenting") viewer.remove();
+    });
+  } catch {
+    hideArLoading();
+    openAndroidSceneViewer(dish);
+  }
+}
+
+function openAndroidSceneViewer(dish) {
+  const modelUrl = absoluteAssetUrl(modelPath(dish.file));
+  const intentUrl =
+    `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(modelUrl)}&mode=ar_only&title=${encodeURIComponent(dish.name)}` +
+    `#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;` +
+    `S.browser_fallback_url=${encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.ar.core")};end;`;
+  window.location.href = intentUrl;
+}
+
 async function openAr(dish) {
   selectedDish = dish;
 
   if (!isMobileArCandidate()) {
-    showArFallback();
+    showArFallback(dish);
     return;
   }
 
@@ -218,30 +337,44 @@ async function openAr(dish) {
   }
 
   if (isAndroid()) {
-    dialogTitle.textContent = dish.name;
-    dialogNote.textContent = "Preparation de la realite augmentee…";
-    viewerSlot.innerHTML = "";
-    dialog.showModal();
-    closeDialog.focus();
-
-    try {
-      const viewer = await prepareViewer(dish);
-      dialogNote.textContent = "";
-      viewer.activateAR();
-    } catch (error) {
-      loadBar.hidden = true;
-      dialogNote.textContent = error.message || "Impossible de lancer la realite augmentee.";
+    const hasWebXr = await checkWebXrAr();
+    if (hasWebXr) {
+      await openAndroidWebXrAr(dish);
+    } else {
+      openAndroidSceneViewer(dish);
     }
     return;
   }
 
-  showArFallback();
+  showArFallback(dish);
 }
 
-function createDishCard(dish) {
-  if (!dish.has3d) {
-    return createClassicCard(dish);
+// --- Partage ---
+
+async function shareDish(dish) {
+  const url = dishUrl(dish);
+
+  if (navigator.share) {
+    try {
+      await navigator.share({
+        title: `${dish.name} — Brasserie Michot`,
+        text: `Découvrez le ${dish.name} en réalité augmentée`,
+        url
+      });
+    } catch { /* annulé par l'utilisateur */ }
+    return;
   }
+
+  try {
+    await navigator.clipboard.writeText(url);
+    showToast("Lien copié !");
+  } catch { /* presse-papier non disponible */ }
+}
+
+// --- Création des cartes ---
+
+function createDishCard(dish) {
+  if (!dish.has3d) return createClassicCard(dish);
 
   const card = document.createElement("article");
   card.className = "dish-card";
@@ -269,7 +402,7 @@ function createDishCard(dish) {
 
   const priceEl = document.createElement("span");
   priceEl.className = "price";
-  priceEl.textContent = `${dish.price}€`;
+  priceEl.textContent = formatPrice(dish.price);
 
   line.append(title, priceEl);
 
@@ -291,7 +424,14 @@ function createDishCard(dish) {
   arButton.textContent = "Poser sur ma table";
   arButton.addEventListener("click", () => openAr(dish));
 
-  actions.append(viewButton, arButton);
+  const shareBtn = document.createElement("button");
+  shareBtn.className = "button button-icon";
+  shareBtn.type = "button";
+  shareBtn.setAttribute("aria-label", "Partager");
+  shareBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>`;
+  shareBtn.addEventListener("click", () => shareDish(dish));
+
+  actions.append(viewButton, arButton, shareBtn);
   content.append(line, desc, actions);
   card.append(preview, content);
 
@@ -323,11 +463,13 @@ function createClassicCard(item) {
 
   const priceEl = document.createElement("span");
   priceEl.className = "price";
-  priceEl.textContent = `${item.price}€`;
+  priceEl.textContent = formatPrice(item.price);
 
   card.append(info, priceEl);
   return card;
 }
+
+// --- Rendu ---
 
 sectionOrder.forEach((section) => {
   dishGrid.append(createSectionTitle(section));
@@ -338,24 +480,37 @@ sectionOrder.forEach((section) => {
   }
 
   dishes
-    .filter((dish) => dish.section === section)
-    .forEach((dish) => dishGrid.append(createDishCard(dish)));
+    .filter((d) => d.section === section)
+    .forEach((d) => dishGrid.append(createDishCard(d)));
 });
+
+// --- Événements du dialog ---
 
 closeDialog.addEventListener("click", () => dialog.close());
 
 dialog.addEventListener("close", () => {
+  history.replaceState(null, "", location.pathname);
   viewerSlot.innerHTML = "";
+  viewerSlot.classList.remove("viewer-slot--qr");
   loadBar.hidden = true;
 });
 
-dialog.addEventListener("click", (event) => {
-  if (event.target === dialog) {
-    dialog.close();
-  }
+dialog.addEventListener("click", (e) => {
+  if (e.target === dialog) dialog.close();
 });
 
 dialogAr.addEventListener("click", async () => {
-  if (!selectedDish) return;
-  await openAr(selectedDish);
+  if (selectedDish) await openAr(selectedDish);
 });
+
+dialogShare.addEventListener("click", () => {
+  if (selectedDish) shareDish(selectedDish);
+});
+
+// --- Hash routing : ouverture directe d'un plat via URL ---
+
+const hashMatch = location.hash.match(/^#plat=(.+)$/);
+if (hashMatch) {
+  const dish = dishes.find((d) => d.has3d && dishSlug(d) === hashMatch[1]);
+  if (dish) openDish(dish);
+}
