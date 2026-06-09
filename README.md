@@ -1,39 +1,28 @@
-# Brasserie Michot - Carte ete 3D / AR
+# Le Carré - Carte AR
 
-Demo web statique pour une carte restaurant premium Vision Gourmand.
+Démo web statique légère pour la carte digitale du Carré Vevey, pensée pour
+téléphone et tablette.
 
-La page affiche une vraie carte courte :
+La page affiche :
 
-- titre `Carte ete Brasserie Michot`
-- plats avec prix
-- 3 plats premium avec 3D/AR quand les formats sont disponibles
-- le reste de la carte en lignes classiques legeres
-- bouton `Voir mon plat`
-- bouton `Poser sur ma table` pour lancer l'AR
+- l'identité Le Carré avec le logo local ;
+- la carte complète des mets hiver 2025-2026 ;
+- une navigation par sections ;
+- un seul bouton d'action : `Poser sur ma table` ;
+- une seule expérience AR de démonstration : `Salade César` ;
+- une ouverture compatible iOS Quick Look et Android Scene Viewer/WebXR ;
+- un écran de préparation stylé avant l'ouverture AR.
 
-## Optimisations anti-bug
+La page ne charge pas les modèles au démarrage et n'utilise pas de polices web
+externes, afin de garder un poids initial bas. La bibliothèque AR et le fichier
+de la salade se chargent uniquement après le clic sur `Poser sur ma table`.
 
-- Seuls 3 plats chargent des fichiers 3D : Sunday dinner, Poulet teriyaki et Donut chocolat.
-- Les autres plats sont affiches comme les boissons, sans fichier 3D.
-- Aucun apercu 3D n'est charge dans la liste.
-- Le modele de la fenetre 3D est charge uniquement au clic sur `Voir mon plat`.
-- Le modele de la fenetre 3D est libere quand on ferme la fenetre.
-- Le bouton AR ne charge plus le viewer 3D avant d'ouvrir la camera.
-- iPhone ouvre directement le `.usdz` avec Quick Look.
-- Android ouvre directement Scene Viewer avec le `.glb` en HTTPS.
-- La librairie `model-viewer` n'est plus chargee au demarrage, seulement au clic sur `Voir mon plat`.
+## Modèles inclus
 
-Pour une version commerciale, il faudra aussi compresser les `.glb`, car certains fichiers font plus de 30 Mo.
+- `assets/models/caesar-salad.glb`
+- `assets/models/caesar-salad.usdz`
 
-## Modeles inclus
-
-- `assets/models/sunday-dinner.glb`
-- `assets/models/sunday-dinner.usdz`
-- `assets/models/teriyaki-chicken.glb`
-- `assets/models/teriyaki-chicken.usdz`
-- `assets/models/chocolate-donut.glb`
-
-## Lancer la demo
+## Lancer la démo
 
 Depuis ce dossier :
 
@@ -49,8 +38,8 @@ http://127.0.0.1:4178/
 
 ## AR
 
-L'AR depend du telephone et du navigateur.
+L'AR dépend du téléphone et du navigateur.
 
-- Android : Chrome peut ouvrir la camera via Scene Viewer/WebXR.
-- iPhone/iPad : Safari fonctionne mieux avec des fichiers `.usdz`.
-- Pour une demo publique, heberge la page en HTTPS sur Vercel, Netlify ou GitHub Pages.
+- Android : Chrome peut ouvrir la caméra via Scene Viewer ou WebXR.
+- iPhone/iPad : Safari fonctionne mieux avec les fichiers `.usdz`.
+- Pour une démo publique, héberger la page en HTTPS.

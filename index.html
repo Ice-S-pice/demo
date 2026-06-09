@@ -3,54 +3,65 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Carte été | Brasserie Michot</title>
+    <title>Le Carré Vevey | Carte AR</title>
     <meta
       name="description"
-      content="Carte été Brasserie Michot avec aperçu 3D et réalité augmentée."
+      content="Carte digitale Le Carré Vevey, pensée pour téléphone et tablette avec expérience AR à table."
     />
-    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=Playfair+Display:wght@700&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="icon" href="assets/brand/le-carre-logo.png" type="image/png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="menu-page">
+    <main class="menu-page" id="top">
       <header class="menu-header">
-        <div class="brand">
-          <span class="brand-mark">BM</span>
-          <div>
-            <p>Brasserie Michot</p>
-            <span>Vision Gourmande</span>
-          </div>
-        </div>
-        <a class="reserve-link" href="tel:+33000000000">Commander</a>
+        <a class="brand" href="#top" aria-label="Retour au début de la carte Le Carré Vevey">
+          <img src="assets/brand/le-carre-logo.png" alt="" class="brand-logo" />
+          <span>
+            <strong>Le Carré</strong>
+            <small>Vevey</small>
+          </span>
+        </a>
+        <a class="reserve-link" href="tel:+41219215006">Appeler</a>
       </header>
 
-      <section class="menu-title" aria-label="Carte été">
-        <p>Carte été</p>
-        <h1>Brasserie Michot</h1>
+      <section class="menu-hero" aria-label="Carte Le Carré Vevey">
+        <div class="hero-copy">
+          <p class="eyebrow">Carte hiver 2025-2026</p>
+          <h1>Le Carré<br />Vevey</h1>
+          <p class="hero-summary">
+            Démo rapide avec une salade César fictive en réalité augmentée.
+            Touchez le bouton, laissez l'écran de préparation faire patienter,
+            puis posez le plat sur la table.
+          </p>
+          <button class="button button-primary hero-cta" id="heroArButton" type="button">
+            Poser sur ma table
+          </button>
+        </div>
+
+        <div class="flavour-strip" aria-label="Repères de la carte">
+          <span>Moules frites</span>
+          <span>Croquettes</span>
+          <span>Burgers</span>
+          <span>Desserts</span>
+          <span>AR à table</span>
+        </div>
       </section>
 
-      <section class="menu-list" id="dishGrid" aria-label="Plats de la carte"></section>
+      <nav class="category-rail" id="categoryRail" aria-label="Sections de la carte"></nav>
+
+      <section class="menu-list" id="dishGrid" aria-label="Carte des mets"></section>
 
       <footer class="menu-footer">
-        <p>Signature du Chef</p>
-        <span>Produits de saison, dressage en 3D et expérience AR à table.</span>
+        <p>Tous nos prix sont en francs suisses, service et TVA 8.1% inclus.</p>
+        <span>Bœuf Suisse/Allemagne · Moules Hollande · Frites · Chocolat</span>
       </footer>
     </main>
 
     <dialog class="dish-dialog" id="dishDialog" aria-labelledby="dialogTitle">
       <div class="dialog-head">
         <strong id="dialogTitle"></strong>
-        <button class="icon-button" id="dialogShare" type="button" aria-label="Partager">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-        </button>
         <button class="icon-button" id="closeDialog" type="button" aria-label="Fermer">
-          ×
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
         </button>
       </div>
       <div class="load-bar" id="loadBar" hidden>
@@ -58,16 +69,8 @@
       </div>
       <div class="viewer-slot" id="viewerSlot"></div>
       <p class="dialog-note" id="dialogNote"></p>
-      <button class="button button-primary" id="dialogAr" type="button">
-        Poser sur ma table
-      </button>
     </dialog>
 
-    <div class="ar-loading" id="arLoading" hidden>
-      <div class="ar-spinner"></div>
-      <p>Préparation AR…</p>
-    </div>
-
-    <script src="app.js"></script>
+    <script src="app.js" defer></script>
   </body>
 </html>
