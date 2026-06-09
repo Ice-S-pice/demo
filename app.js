@@ -534,12 +534,9 @@ const loadBarFill = document.querySelector("#loadBarFill");
 const closeDialog = document.querySelector("#closeDialog");
 
 let selectedDish = null;
-let hiddenArViewer = null;
-let arSessionStarted = false;
-let modelViewerPromise = null;
 let progressFrame = null;
 let loadingStartedAt = 0;
-const MIN_AR_PREP_MS = 3400;
+const MIN_AR_PREP_MS = 1900;
 
 const featuredDish = demoDish;
 
@@ -591,37 +588,6 @@ function androidSceneViewerUrl(dish) {
     `#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;` +
     `S.browser_fallback_url=${encodeURIComponent("https://play.google.com/store/apps/details?id=com.google.ar.core")};end;`
   );
-}
-
-function ensureModelViewer() {
-  if (customElements.get("model-viewer")) return Promise.resolve();
-
-  if (!modelViewerPromise) {
-    modelViewerPromise = import("https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js")
-      .catch(() => {
-        modelViewerPromise = null;
-        throw new Error("La vue AR n'a pas pu se charger.");
-      });
-  }
-
-  return modelViewerPromise;
-}
-
-function applyModelSettings(viewer, dish) {
-  viewer.src = modelPath(dish.file);
-  if (dish.usdz) viewer.setAttribute("ios-src", usdzPath(dish));
-  viewer.alt = dish.name;
-  viewer.setAttribute("interaction-prompt", "none");
-  viewer.setAttribute("shadow-intensity", "0.86");
-  viewer.setAttribute("shadow-softness", "0.92");
-  viewer.setAttribute("environment-image", "neutral");
-  viewer.setAttribute("exposure", "1");
-  viewer.setAttribute("camera-orbit", dish.cameraOrbit || "38deg 68deg 2.35m");
-  viewer.setAttribute("field-of-view", "24deg");
-  viewer.setAttribute("scale", dish.scale || "1.25 1.25 1.25");
-  viewer.setAttribute("ar", "");
-  viewer.setAttribute("ar-modes", "webxr scene-viewer quick-look");
-  viewer.setAttribute("ar-scale", "fixed");
 }
 
 function createDishVisual(dish, size = "normal") {
@@ -692,7 +658,7 @@ function startFakeProgress() {
 
   const tick = (now) => {
     const elapsed = now - loadingStartedAt;
-    const t = Math.min(elapsed / 3900, 1);
+    const t = Math.min(elapsed / 2300, 1);
     loadBarFill.style.width = `${progressCurve(t).toFixed(1)}%`;
     progressFrame = window.requestAnimationFrame(tick);
   };
@@ -716,9 +682,8 @@ async function finishArProgress(note) {
 
 function showArPreparing(dish) {
   selectedDish = dish;
-  arSessionStarted = false;
   dialogTitle.textContent = "Préparation AR";
-  dialogNote.textContent = `${dish.name} se prépare pour votre table.`;
+  dialogNote.textContent = `${dish.name} prend sa place, juste avant d'arriver sur votre table.`;
   viewerSlot.innerHTML = "";
   viewerSlot.classList.remove("viewer-slot--qr");
   viewerSlot.classList.add("viewer-slot--prep");
@@ -729,7 +694,7 @@ function showArPreparing(dish) {
     <div class="ar-prep-logo"><img src="assets/brand/le-carre-logo.png" alt="" /></div>
     <div class="ar-prep-copy">
       <strong>On prépare votre table</strong>
-      <span>Chargement à la demande, pour garder la carte légère.</span>
+      <span>Un instant, le plat quitte la carte pour rejoindre la table.</span>
     </div>
     <div class="ar-prep-dots" aria-hidden="true"><span></span><span></span><span></span></div>
   `;
@@ -797,51 +762,6 @@ async function openIosQuickLook(dish) {
   closeArDialogSoon();
 }
 
-async function checkWebXrAr() {
-  if (!navigator.xr) return false;
-  return navigator.xr.isSessionSupported("immersive-ar").catch(() => false);
-}
-
-async function openAndroidWebXrAr(dish) {
-  await ensureModelViewer();
-  dialogNote.textContent = "Chargement du plat...";
-
-  const viewer = document.createElement("model-viewer");
-  hiddenArViewer = viewer;
-  applyModelSettings(viewer, dish);
-  viewer.style.cssText = "position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;top:-9999px";
-  document.body.append(viewer);
-
-  viewer.addEventListener("progress", (event) => {
-    if (event.detail.totalProgress > 0.55) {
-      dialogNote.textContent = "Dressage du plat...";
-    }
-  });
-
-  await new Promise((resolve, reject) => {
-    viewer.addEventListener("load", resolve, { once: true });
-    viewer.addEventListener("error", () => reject(new Error("load failed")), { once: true });
-  });
-
-  await finishArProgress("Ouverture de l'expérience AR...");
-
-  if (typeof viewer.activateAR !== "function") {
-    throw new Error("AR unavailable");
-  }
-
-  viewer.activateAR();
-  arSessionStarted = true;
-  closeArDialogSoon(700);
-
-  viewer.addEventListener("ar-status", (event) => {
-    if (event.detail.status === "not-presenting") {
-      viewer.remove();
-      if (hiddenArViewer === viewer) hiddenArViewer = null;
-      arSessionStarted = false;
-    }
-  });
-}
-
 async function openAndroidSceneViewer(dish) {
   await finishArProgress("Ouverture de l'expérience AR...");
   window.setTimeout(() => {
@@ -855,7 +775,7 @@ async function openAr(dish) {
   showArPreparing(dish);
 
   if (!isMobileArCandidate()) {
-    window.setTimeout(() => showArFallback(dish), 4200);
+    window.setTimeout(() => showArFallback(dish), 2600);
     return;
   }
 
@@ -865,16 +785,7 @@ async function openAr(dish) {
   }
 
   if (isAndroid()) {
-    try {
-      const hasWebXr = await checkWebXrAr();
-      if (hasWebXr) {
-        await openAndroidWebXrAr(dish);
-      } else {
-        await openAndroidSceneViewer(dish);
-      }
-    } catch {
-      await openAndroidSceneViewer(dish);
-    }
+    await openAndroidSceneViewer(dish);
     return;
   }
 
@@ -1014,11 +925,6 @@ closeDialog.addEventListener("click", () => dialog.close());
 
 dialog.addEventListener("close", () => {
   stopFakeProgress();
-  if (hiddenArViewer && !arSessionStarted) {
-    hiddenArViewer.remove();
-    hiddenArViewer = null;
-  }
-
   viewerSlot.innerHTML = "";
   viewerSlot.classList.remove("viewer-slot--qr");
   viewerSlot.classList.remove("viewer-slot--prep");
