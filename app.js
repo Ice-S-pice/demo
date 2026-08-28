@@ -504,15 +504,15 @@ const dishes = [
 ];
 
 const demoDish = {
-  id: "demo-salade-cesar",
-  name: "Salade César",
-  description: "Plat fictif de démonstration AR, placé en haut pour une présentation rapide.",
+  id: "demo-objet",
+  name: "Objet",
+  description: "Objet de démonstration AR, placé en haut pour une présentation rapide.",
   price: "Démo",
   tags: ["Démo AR"],
   tone: "green",
   hasAr: true,
-  file: "caesar-salad.glb",
-  usdz: "caesar-salad.usdz",
+  file: "objet.glb",
+  usdz: "objet.usdz",
   cameraOrbit: "35deg 66deg 1.05m",
   scale: "1.55 1.55 1.55"
 };
@@ -694,7 +694,7 @@ function showArPreparing(dish) {
     <div class="ar-prep-logo"><img src="assets/brand/le-carre-logo.png" alt="" /></div>
     <div class="ar-prep-copy">
       <strong>On prépare votre table</strong>
-      <span>Un instant, le plat quitte la carte pour rejoindre la table.</span>
+      <span>Un instant, l'objet quitte la carte pour rejoindre la table.</span>
     </div>
     <div class="ar-prep-dots" aria-hidden="true"><span></span><span></span><span></span></div>
   `;

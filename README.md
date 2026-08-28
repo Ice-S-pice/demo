@@ -9,18 +9,18 @@ La page affiche :
 - la carte complète des mets hiver 2025-2026 ;
 - une navigation par sections ;
 - un seul bouton d'action : `Poser sur ma table` ;
-- une seule expérience AR de démonstration : `Salade César` ;
+- une seule expérience AR de démonstration : `Objet` ;
 - une ouverture compatible iOS Quick Look et Android Scene Viewer/WebXR ;
 - un écran de préparation stylé avant l'ouverture AR.
 
 La page ne charge pas les modèles au démarrage et n'utilise pas de polices web
 externes, afin de garder un poids initial bas. La bibliothèque AR et le fichier
-de la salade se chargent uniquement après le clic sur `Poser sur ma table`.
+de l'objet se chargent uniquement après le clic sur `Poser sur ma table`.
 
 ## Modèles inclus
 
-- `assets/models/caesar-salad.glb`
-- `assets/models/caesar-salad.usdz`
+- `assets/models/objet.glb`
+- `assets/models/objet.usdz`
 
 ## Lancer la démo
 
