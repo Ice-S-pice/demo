@@ -504,17 +504,17 @@ const dishes = [
 ];
 
 const demoDish = {
-  id: "demo-objet-3",
-  name: "Objet (3)",
-  description: "Objet (3) de démonstration AR, placé en haut pour une présentation rapide.",
+  id: "mifondant-mi-caramel",
+  name: "Mi-fondant mi-caramel",
+  description: "Ardoise de démonstration AR : mi-fondant, caramel, agrumes et fruits rouges.",
   price: "Démo",
   tags: ["Démo AR"],
-  tone: "green",
+  tone: "brown",
   hasAr: true,
-  file: "objet (3).glb",
-  usdz: "objet (3).usdz",
+  file: "mifondant-mi-caramel.glb",
+  usdz: "mifondant-mi-caramel.usdz",
   cameraOrbit: "35deg 66deg 1.05m",
-  scale: "1.55 1.55 1.55"
+  scale: "1 1 1"
 };
 
 const modelPath = (file) => `assets/models/${encodeURIComponent(file)}`;
