@@ -506,7 +506,7 @@ const dishes = [
 // Numéro de build. À incrémenter à CHAQUE push : il s'affiche en haut de la page
 // et sur la carte, ce qui permet de voir d'un coup d'œil si GitHub Pages a fini de
 // publier la nouvelle version. Il sert aussi de cache-buster sur les modèles.
-const DEMO_VERSION = 2;
+const DEMO_VERSION = 3;
 
 const demoDish = {
   id: "demo-objet-3",
