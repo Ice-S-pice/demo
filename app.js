@@ -504,15 +504,15 @@ const dishes = [
 ];
 
 const demoDish = {
-  id: "demo-test",
-  name: "Test",
-  description: "Modèle test de démonstration AR, placé en haut pour une présentation rapide.",
+  id: "demo-objet-2",
+  name: "Objet (2)",
+  description: "Objet (2) de démonstration AR, placé en haut pour une présentation rapide.",
   price: "Démo",
   tags: ["Démo AR"],
   tone: "green",
   hasAr: true,
-  file: "test.glb",
-  usdz: "test.usdz",
+  file: "objet (2).glb",
+  usdz: "objet (2).usdz",
   cameraOrbit: "35deg 66deg 1.05m",
   scale: "1.55 1.55 1.55"
 };
@@ -694,7 +694,7 @@ function showArPreparing(dish) {
     <div class="ar-prep-logo"><img src="assets/brand/le-carre-logo.png" alt="" /></div>
     <div class="ar-prep-copy">
       <strong>On prépare votre table</strong>
-      <span>Un instant, le modèle quitte la carte pour rejoindre la table.</span>
+      <span>Un instant, l'objet quitte la carte pour rejoindre la table.</span>
     </div>
     <div class="ar-prep-dots" aria-hidden="true"><span></span><span></span><span></span></div>
   `;
