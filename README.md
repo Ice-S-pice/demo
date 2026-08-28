@@ -9,18 +9,18 @@ La page affiche :
 - la carte complète des mets hiver 2025-2026 ;
 - une navigation par sections ;
 - un seul bouton d'action : `Poser sur ma table` ;
-- une seule expérience AR de démonstration : `Objet (2)` ;
+- une seule expérience AR de démonstration : `Objet (3)` ;
 - une ouverture compatible iOS Quick Look et Android Scene Viewer/WebXR ;
 - un écran de préparation stylé avant l'ouverture AR.
 
 La page ne charge pas les modèles au démarrage et n'utilise pas de polices web
 externes, afin de garder un poids initial bas. La bibliothèque AR et le fichier
-de l'objet (2) se chargent uniquement après le clic sur `Poser sur ma table`.
+de l'objet (3) se chargent uniquement après le clic sur `Poser sur ma table`.
 
 ## Modèles inclus
 
-- `assets/models/objet (2).glb`
-- `assets/models/objet (2).usdz`
+- `assets/models/objet (3).glb`
+- `assets/models/objet (3).usdz`
 
 ## Lancer la démo
 

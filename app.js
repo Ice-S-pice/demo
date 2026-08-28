@@ -180,7 +180,7 @@ const dishes = [
   {
     id: "filets-perches",
     section: "plats",
-    name: "Filets de perches meunière",
+    name: "Filets de perche à la meunière",
     description: "Tendres et dorés au beurre, avec frites, salade et sauce tartare maison.",
     price: "38.50",
     tags: ["Poisson"],
@@ -414,7 +414,7 @@ const dishes = [
   {
     id: "mi-fondant-cookie",
     section: "desserts",
-    name: "Mi-fondant mi-cookies",
+    name: "Mi-fondant mi-cookie",
     description: "Deux textures, biscuit croustillant et moelleux fondant.",
     price: "13.-",
     tags: ["Gourmand"],
@@ -441,10 +441,10 @@ const dishes = [
   {
     id: "tiramisu-speculos",
     section: "desserts",
-    name: "Tiramisu au spéculos et amaretto",
-    description: "Classique revisité, épices de spéculos et chaleur de l'amaretto.",
+    name: "Tiramisu au spéculoos et amaretto",
+    description: "Classique revisité, épices de spéculoos et chaleur de l'amaretto.",
     price: "11.-",
-    tags: ["Spéculos"],
+    tags: ["Spéculoos"],
     tone: "brown"
   },
   {
@@ -504,15 +504,15 @@ const dishes = [
 ];
 
 const demoDish = {
-  id: "demo-objet-2",
-  name: "Objet (2)",
-  description: "Objet (2) de démonstration AR, placé en haut pour une présentation rapide.",
+  id: "demo-objet-3",
+  name: "Objet (3)",
+  description: "Objet (3) de démonstration AR, placé en haut pour une présentation rapide.",
   price: "Démo",
   tags: ["Démo AR"],
   tone: "green",
   hasAr: true,
-  file: "objet (2).glb",
-  usdz: "objet (2).usdz",
+  file: "objet (3).glb",
+  usdz: "objet (3).usdz",
   cameraOrbit: "35deg 66deg 1.05m",
   scale: "1.55 1.55 1.55"
 };
@@ -806,6 +806,7 @@ function createSectionNav() {
     const link = document.createElement("a");
     link.href = `#${section.id}`;
     link.className = `nav-chip nav-chip--${section.tone}`;
+    link.dataset.sectionId = section.id;
     link.innerHTML = `<span>${String(index + 1).padStart(2, "0")}</span>${section.title}`;
     categoryRail.append(link);
   });
@@ -814,6 +815,7 @@ function createSectionNav() {
 function createSectionTitle(section) {
   const head = document.createElement("header");
   head.className = `section-head section-head--${section.tone}`;
+  head.dataset.sectionId = section.id;
 
   const copy = document.createElement("div");
   const kicker = document.createElement("p");
@@ -911,6 +913,7 @@ function renderMenu() {
 
     const grid = document.createElement("div");
     grid.className = "dish-grid";
+    grid.id = `${section.id}-dishes`;
 
     dishes
       .filter((dish) => dish.section === section.id)
