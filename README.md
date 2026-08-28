@@ -9,22 +9,18 @@ La page affiche :
 - la carte complète des mets hiver 2025-2026 ;
 - une navigation par sections ;
 - un seul bouton d'action : `Poser sur ma table` ;
-- une seule expérience AR de démonstration : `Mi-fondant mi-caramel` ;
+- une seule expérience AR de démonstration : `Objet (3)` ;
 - une ouverture compatible iOS Quick Look et Android Scene Viewer/WebXR ;
 - un écran de préparation stylé avant l'ouverture AR.
 
 La page ne charge pas les modèles au démarrage et n'utilise pas de polices web
-externes, afin de garder un poids initial bas. Le modèle se charge uniquement
-après le clic sur `Poser sur ma table`.
+externes, afin de garder un poids initial bas. La bibliothèque AR et le fichier
+de l'objet (3) se chargent uniquement après le clic sur `Poser sur ma table`.
 
 ## Modèles inclus
 
-- `assets/models/mifondant-mi-caramel.glb` (Android Scene Viewer, maillage Draco)
-- `assets/models/mifondant-mi-caramel.usdz` (iOS Quick Look)
-
-Source : scan RealityCapture `assets/models/Mifondant mi caramel.zip`. Le modèle
-est recentré (posé sur le sol, centré en X/Z), à l'échelle réelle (ardoise de
-44 x 23 cm), textures diffuse et normale réduites de 8192 à 2048 px.
+- `assets/models/objet (3).glb`
+- `assets/models/objet (3).usdz`
 
 ## Lancer la démo
 
