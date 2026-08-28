@@ -503,10 +503,15 @@ const dishes = [
   }
 ];
 
+// Numéro de build. À incrémenter à CHAQUE push : il s'affiche en haut de la page
+// et sur la carte, ce qui permet de voir d'un coup d'œil si GitHub Pages a fini de
+// publier la nouvelle version. Il sert aussi de cache-buster sur les modèles.
+const DEMO_VERSION = 2;
+
 const demoDish = {
   id: "demo-objet-3",
-  name: "Objet (3)",
-  description: "Objet (3) de démonstration AR, placé en haut pour une présentation rapide.",
+  name: `Démo AR ${DEMO_VERSION}`,
+  description: "Objet de démonstration AR, placé en haut pour une présentation rapide.",
   price: "Démo",
   tags: ["Démo AR"],
   tone: "green",
@@ -517,8 +522,9 @@ const demoDish = {
   scale: "1.55 1.55 1.55"
 };
 
-const modelPath = (file) => `assets/models/${encodeURIComponent(file)}`;
-const usdzPath = (dish) => `assets/models/${encodeURIComponent(dish.usdz || dish.file.replace(/\.glb$/i, ".usdz"))}`;
+const cacheBust = (path) => `${path}?v=${DEMO_VERSION}`;
+const modelPath = (file) => cacheBust(`assets/models/${encodeURIComponent(file)}`);
+const usdzPath = (dish) => cacheBust(`assets/models/${encodeURIComponent(dish.usdz || dish.file.replace(/\.glb$/i, ".usdz"))}`);
 const absoluteAssetUrl = (path) => new URL(path, window.location.href).href;
 const formatPrice = (price) => `CHF ${price}`;
 
@@ -941,4 +947,10 @@ dialog.addEventListener("click", (e) => {
 
 heroArButton.addEventListener("click", () => openAr(featuredDish));
 
+function renderVersionBadge() {
+  const slot = document.querySelector("#versionBadge");
+  if (slot) slot.textContent = `v${DEMO_VERSION}`;
+}
+
+renderVersionBadge();
 renderMenu();

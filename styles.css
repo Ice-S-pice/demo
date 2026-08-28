@@ -196,6 +196,22 @@ img {
   gap: 8px;
 }
 
+/* Numéro de build : repère de test, pas un élément de carte. */
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 46px;
+  padding: 0 10px;
+  border: 1px solid rgba(168, 216, 232, 0.28);
+  border-radius: 8px;
+  color: rgba(255, 244, 222, 0.72);
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 0.78rem;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
 .menu-hero {
   display: grid;
   gap: 16px;
@@ -1143,6 +1159,12 @@ img {
 
   .header-actions {
     gap: 6px;
+  }
+
+  .version-badge {
+    min-height: 40px;
+    padding-inline: 8px;
+    font-size: 0.72rem;
   }
 
   .hero-copy {
