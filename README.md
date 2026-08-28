@@ -19,8 +19,11 @@ de l'objet (3) se chargent uniquement après le clic sur `Poser sur ma table`.
 
 ## Modèles inclus
 
-- `assets/models/objet (3).glb`
-- `assets/models/objet (3).usdz`
+- `assets/models/objet.glb` — Scene Viewer (AR Android) et repli general
+- `assets/models/objet.usdz` — AR Quick Look (AR iOS)
+- `assets/models/objet_webxr.glb` — variante Draco, non utilisee par cette page
+  (le chemin WebXR de `model-viewer` n'est pas branche ici) ; ne jamais la servir
+  a Scene Viewer, qui refuse l'extension Draco.
 
 ## Lancer la démo
 

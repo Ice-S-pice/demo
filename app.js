@@ -511,8 +511,8 @@ const demoDish = {
   tags: ["Démo AR"],
   tone: "green",
   hasAr: true,
-  file: "objet (3).glb",
-  usdz: "objet (3).usdz",
+  file: "objet.glb",
+  usdz: "objet.usdz",
   cameraOrbit: "35deg 66deg 1.05m",
   scale: "1.55 1.55 1.55"
 };
